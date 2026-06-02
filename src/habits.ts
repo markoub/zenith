@@ -46,7 +46,7 @@ export function toggleCompletion(habit: Habit, day: string): Habit {
   return { ...habit, completions };
 }
 
-function shiftDay(day: string, delta: number): string {
+export function shiftDay(day: string, delta: number): string {
   const d = new Date(day + "T00:00:00Z");
   d.setUTCDate(d.getUTCDate() + delta);
   return d.toISOString().slice(0, 10);

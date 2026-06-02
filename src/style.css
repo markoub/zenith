@@ -82,12 +82,41 @@ form#add button {
 
 .habits li {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 8px;
   padding: 12px 14px;
   background: var(--card);
   border: 1px solid #2c2f50;
   border-radius: 14px;
+}
+
+.habit-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(30, 1fr);
+  gap: 2px;
+}
+
+.heatmap-cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: #2c2f50;
+  min-width: 0;
+}
+
+.heatmap-cell.done {
+  background: var(--accent);
+}
+
+.weekly-stats {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: right;
 }
 
 .habits li.done {
@@ -95,6 +124,7 @@ form#add button {
 }
 
 .habits li.empty {
+  align-items: center;
   justify-content: center;
   color: var(--muted);
   border-style: dashed;

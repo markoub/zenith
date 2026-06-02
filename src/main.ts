@@ -5,7 +5,9 @@ import {
   toggleCompletion,
   isCompletedOn,
   dayStr,
+  shiftDay,
   currentStreak,
+  last7Count,
 } from "./habits";
 
 const STORAGE_KEY = "zenith.habits.v1";
@@ -53,14 +55,24 @@ function render(): void {
                     streak === 0
                       ? ""
                       : `<span class="streak">${streak}${streak >= 3 ? " 🔥" : ""}</span>`;
+                  const heatmapCells = Array.from({ length: 30 }, (_, i) => {
+                    const day = shiftDay(today, i - 29);
+                    const cellDone = isCompletedOn(h, day);
+                    return `<div class="heatmap-cell${cellDone ? " done" : ""}" title="${day}"></div>`;
+                  }).join("");
+                  const weeklyCount = last7Count(h, today);
                   return `
                     <li class="${done ? "done" : ""}">
-                      <button class="check" data-id="${h.id}" aria-label="Toggle ${h.name}">
-                        ${done ? "✓" : ""}
-                      </button>
-                      <span class="hname">${escapeHtml(h.name)}</span>
-                      ${streakHtml}
-                      <button class="del" data-del="${h.id}" aria-label="Delete ${h.name}">×</button>
+                      <div class="habit-row">
+                        <button class="check" data-id="${h.id}" aria-label="Toggle ${h.name}">
+                          ${done ? "✓" : ""}
+                        </button>
+                        <span class="hname">${escapeHtml(h.name)}</span>
+                        ${streakHtml}
+                        <button class="del" data-del="${h.id}" aria-label="Delete ${h.name}">×</button>
+                      </div>
+                      <div class="heatmap" aria-hidden="true">${heatmapCells}</div>
+                      <div class="weekly-stats">${weeklyCount} / 7 this week</div>
                     </li>`;
                 })
                 .join("")
