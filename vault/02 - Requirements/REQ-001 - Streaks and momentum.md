@@ -2,7 +2,7 @@
 type: requirement
 id: REQ-001
 title: Streaks and momentum
-status: draft          # 🎬 DEMO: flip this to `ready`, commit & push to wake the pipeline
+status: ready          # 🎬 DEMO: flip this to `ready`, commit & push to wake the pipeline
 priority: high
 created: 2026-06-02
 issues: []
