@@ -5,6 +5,7 @@ import {
   toggleCompletion,
   isCompletedOn,
   dayStr,
+  currentStreak,
 } from "./habits";
 
 const STORAGE_KEY = "zenith.habits.v1";
@@ -47,12 +48,18 @@ function render(): void {
             : habits
                 .map((h) => {
                   const done = isCompletedOn(h, today);
+                  const streak = currentStreak(h, today);
+                  const streakHtml =
+                    streak === 0
+                      ? ""
+                      : `<span class="streak">${streak}${streak >= 3 ? " 🔥" : ""}</span>`;
                   return `
                     <li class="${done ? "done" : ""}">
                       <button class="check" data-id="${h.id}" aria-label="Toggle ${h.name}">
                         ${done ? "✓" : ""}
                       </button>
                       <span class="hname">${escapeHtml(h.name)}</span>
+                      ${streakHtml}
                       <button class="del" data-del="${h.id}" aria-label="Delete ${h.name}">×</button>
                     </li>`;
                 })
