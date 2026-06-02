@@ -45,3 +45,49 @@ export function toggleCompletion(habit: Habit, day: string): Habit {
     : [...habit.completions, day].sort();
   return { ...habit, completions };
 }
+
+function shiftDay(day: string, delta: number): string {
+  const d = new Date(day + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + delta);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Count of consecutive completed days ending on or just before `today`.
+ * If `today` is not completed but yesterday is, the streak runs through yesterday.
+ * Returns 0 when neither today nor yesterday is completed.
+ */
+export function currentStreak(habit: Habit, today: string): number {
+  const set = new Set(habit.completions);
+  let day = today;
+  if (!set.has(day)) {
+    day = shiftDay(day, -1);
+    if (!set.has(day)) return 0;
+  }
+  let count = 0;
+  while (set.has(day)) {
+    count++;
+    day = shiftDay(day, -1);
+  }
+  return count;
+}
+
+/**
+ * Length of the longest run of consecutive completed days ever recorded.
+ * Returns 0 for a habit with no completions.
+ */
+export function bestStreak(habit: Habit): number {
+  if (habit.completions.length === 0) return 0;
+  const sorted = [...habit.completions].sort();
+  let best = 1;
+  let run = 1;
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] === shiftDay(sorted[i - 1], 1)) {
+      run++;
+      if (run > best) best = run;
+    } else {
+      run = 1;
+    }
+  }
+  return best;
+}
