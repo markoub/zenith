@@ -19,7 +19,7 @@ gh api -X PATCH "repos/$REPO" -f allow_auto_merge=true -f delete_branch_on_merge
 gh api -X POST "repos/$REPO/pages" -f "source[branch]=main" -f build_type=workflow >/dev/null 2>&1 \
   || gh api -X PUT "repos/$REPO/pages" -f build_type=workflow >/dev/null 2>&1 || true
 
-echo "✅ Done. Remaining manual steps (one-time):"
-echo "   1) gh secret set CLAUDE_CODE_OAUTH_TOKEN --repo $REPO   (value from: claude setup-token)"
-echo "   2) gh secret set PIPELINE_TOKEN          --repo $REPO   (a PAT with repo+workflow scope)"
-echo "   3) Install the Claude GitHub App on $REPO (recommended): https://github.com/apps/claude"
+echo "✅ Done."
+echo "   The Analyst / Developer / Reviewer are Claude Routines (claude.ai/code/routines) —"
+echo "   they run on your Claude cloud subscription and need NO repo secrets or PAT."
+echo "   CI + Deploy are GitHub Actions and use the built-in GITHUB_TOKEN."

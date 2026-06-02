@@ -13,28 +13,35 @@ written here flows, with no human writing code, all the way to a deployed featur
 ```mermaid
 flowchart TD
     A["📝 Requirement note in Obsidian<br/>(status: ready)"] -->|git push| B
-    B["🧭 Analyst routine<br/>analyst.yml"] -->|creates| C["🎫 GitHub Issues<br/>label: ready-for-dev"]
-    C -->|issue labeled| D["👩‍💻 Developer routine<br/>developer.yml"]
+    B["🧭 Analyst<br/><i>Claude Routine</i>"] -->|creates| C["🎫 GitHub Issues<br/>label: ready-for-dev"]
+    C -->|picks up| D["👩‍💻 Developer<br/><i>Claude Routine</i>"]
     D -->|opens PR<br/>label: needs-review| E["🔀 Pull Request"]
-    E --> F["✅ CI / Tester<br/>ci.yml — npm test + build"]
-    E --> G["🧐 Reviewer routine<br/>reviewer.yml"]
-    G -->|approves<br/>label: ready-to-merge| H["🤝 Auto-merge<br/>auto-merge.yml"]
+    E --> F["✅ CI / Tester<br/><i>ci.yml</i> — npm test + build"]
+    E --> G["🧐 Reviewer<br/><i>Claude Routine</i>"]
+    G -->|review + label: ready-to-merge| H["🤝 Squash-merge"]
     F -->|green check| H
-    H -->|squash-merge to main| I["🚀 Deploy routine<br/>deploy.yml → GitHub Pages"]
+    H -->|push to main| I["🚀 Deploy<br/><i>deploy.yml</i> → GitHub Pages"]
     I --> J["🌍 Live app"]
     B -.->|sets status: groomed,<br/>links issues| A
 ```
 
-## The cast (each is a GitHub Actions workflow running Claude Code)
+## The cast
 
-| Stage | Workflow | Trigger | What the agent does |
-| ----- | -------- | ------- | ------------------- |
-| 🧭 **Analyst** | `analyst.yml` | push to `vault/02 - Requirements/**` | Reads `ready` requirements, decomposes each into 2–4 well-formed issues with acceptance criteria, labels them `ready-for-dev`, links them back into the note, sets it `groomed`. |
-| 👩‍💻 **Developer** | `developer.yml` | issue labeled `ready-for-dev` | Branches, implements the feature + tests, runs the build, opens a PR (`Closes #N`), labels it `needs-review`. |
-| ✅ **Tester / CI** | `ci.yml` | every pull request | `npm ci && npm test && npm run build`. The green check. |
-| 🧐 **Reviewer** | `reviewer.yml` | PR opened / `needs-review` | Reviews the diff against `CLAUDE.md` standards, posts inline comments, then approves (`ready-to-merge`) or requests changes. |
-| 🤝 **Merge** | `auto-merge.yml` | review approved + CI green | Squash-merges, closes the issue, deletes the branch. |
-| 🚀 **Deploy** | `deploy.yml` | push to `main` | Builds and publishes to GitHub Pages. |
+The three thinking roles are **Claude Routines** — autonomous cloud agents (watch them at
+[claude.ai/code/routines](https://claude.ai/code/routines)). They run **hourly** and can be
+**run on-demand** ("Run now"). The two mechanical roles are **GitHub Actions**.
+
+| Stage | Runs as | Cadence | What the agent does |
+| ----- | ------- | ------- | ------------------- |
+| 🧭 **Analyst** | Claude Routine | hourly + on-demand | Reads `ready` requirements, decomposes each into 2–4 well-formed issues with acceptance criteria, labels them `ready-for-dev`, links them back into the note, sets it `groomed`. |
+| 👩‍💻 **Developer** | Claude Routine | hourly + on-demand | Picks an unstarted `ready-for-dev` issue, branches, implements the feature + tests, runs the build, opens a PR (`Closes #N`), labels it `needs-review`. |
+| ✅ **Tester / CI** | GitHub Action `ci.yml` | every pull request | `npm ci && npm test && npm run build`. The green check. |
+| 🧐 **Reviewer** | Claude Routine | hourly + on-demand | Reviews the diff against `CLAUDE.md` standards, posts a review, then (if it passes and CI is green) labels `ready-to-merge` and squash-merges. |
+| 🚀 **Deploy** | GitHub Action `deploy.yml` | push to `main` | Builds and publishes to GitHub Pages. |
+
+> Why this split? The **judgement** work (analyse, build, review) is done by Claude Routines
+> that reason about the repo. The **deterministic** work (run the test suite, ship the build)
+> is done by plain CI — fast, free, and perfectly reproducible.
 
 The detailed brief each agent follows lives in [`.github/agents/`](https://github.com/markoub/zenith)
 (`analyst.md`, `developer.md`, `reviewer.md`).

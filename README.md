@@ -10,29 +10,33 @@
 ## The twist: nobody writes the code
 
 A product idea is written as a **requirement note in Obsidian**. From there, a relay of
-Claude agents — running as GitHub Actions — carries it all the way to a deployed feature:
+**Claude Routines** (scheduled cloud agents) carries it all the way to a deployed feature,
+with **GitHub Actions** handling the deterministic plumbing (tests + deploy):
 
 ```mermaid
 flowchart LR
-    A["📝 Requirement<br/>in Obsidian"] -->|git push| B["🧭 Analyst"]
-    B -->|GitHub issues| C["👩‍💻 Developer"]
-    C -->|pull request| D["✅ CI / Tester"]
-    C --> E["🧐 Reviewer"]
+    A["📝 Requirement<br/>in Obsidian"] -->|git push| B["🧭 Analyst<br/><i>routine</i>"]
+    B -->|GitHub issues| C["👩‍💻 Developer<br/><i>routine</i>"]
+    C -->|pull request| D["✅ CI / Tester<br/><i>action</i>"]
+    C --> E["🧐 Reviewer<br/><i>routine</i>"]
     D --> F["🤝 Merge"]
     E --> F
-    F -->|push to main| G["🚀 Deploy"]
+    F -->|push to main| G["🚀 Deploy<br/><i>action</i>"]
     G --> H["🌍 Live app"]
 ```
 
-| Stage | Workflow | What happens |
-| ----- | -------- | ------------ |
-| 🧭 **Analyst** | [`analyst.yml`](.github/workflows/analyst.yml) | Grooms a `ready` requirement into well-formed GitHub issues. |
-| 👩‍💻 **Developer** | [`developer.yml`](.github/workflows/developer.yml) | Implements an issue on a branch, with tests, and opens a PR. |
-| ✅ **Tester / CI** | [`ci.yml`](.github/workflows/ci.yml) | `npm test` + `npm run build` on every PR. |
-| 🧐 **Reviewer** | [`reviewer.yml`](.github/workflows/reviewer.yml) | Reviews the diff, approves or requests changes, then merges. |
-| 🚀 **Deploy** | [`deploy.yml`](.github/workflows/deploy.yml) | Publishes to GitHub Pages. |
+The three AI roles are **Claude Routines** — autonomous cloud agents you can watch in the
+[Routines panel](https://claude.ai/code/routines). They run hourly and on-demand:
 
-Each agent follows a versioned role brief in [`.github/agents/`](.github/agents). The full
+| Stage | Runs as | What happens |
+| ----- | ------- | ------------ |
+| 🧭 **Analyst** | Claude Routine | Grooms a `ready` requirement into well-formed GitHub issues. |
+| 👩‍💻 **Developer** | Claude Routine | Implements an issue on a branch, with tests, and opens a PR. |
+| ✅ **Tester / CI** | GitHub Action ([`ci.yml`](.github/workflows/ci.yml)) | `npm test` + `npm run build` on every PR. |
+| 🧐 **Reviewer** | Claude Routine | Reviews the diff, requests changes or merges once CI is green. |
+| 🚀 **Deploy** | GitHub Action ([`deploy.yml`](.github/workflows/deploy.yml)) | Publishes to GitHub Pages. |
+
+Each routine follows a versioned role brief in [`.github/agents/`](.github/agents). The full
 story is in the vault: [`vault/09 - How it works/SDLC Pipeline.md`](vault/09%20-%20How%20it%20works/SDLC%20Pipeline.md).
 
 ### Start the machine

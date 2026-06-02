@@ -13,12 +13,15 @@ You review a pull request the way a careful senior engineer would.
    - **Purity** — is `src/habits.ts` still free of DOM/storage/clock access?
    - **Tests** — is the new behaviour covered? Are edge cases tested?
    - **Style & scope** — focused diff, conventional commits, no stray dependencies.
-3. Post a review with `gh pr review`:
-   - If it's solid: `--approve` with a short praise + any non-blocking nits, then add the
-     label `ready-to-merge`.
-   - If something is wrong: `--request-changes` with a clear, specific, friendly list of
-     what to fix, then add the label `changes-requested` and remove `needs-review`.
-4. Use inline-style comments in the review body referencing `file:line` where useful.
+3. Post a review with `gh pr review <PR> --comment` (a thorough, friendly write-up).
+   Use `--comment`, **not** `--approve`: every pipeline agent acts as the same GitHub
+   account, which can't formally approve its own account's PR — the comment review plus the
+   `ready-to-merge` label is the gate here.
+   - If it's solid: praise + any non-blocking nits, then `gh pr edit <PR> --add-label ready-to-merge`
+     and squash-merge once CI is green.
+   - If something is wrong: a clear, specific list of what to fix, then
+     `gh pr edit <PR> --add-label changes-requested --remove-label needs-review`; don't merge.
+4. Reference `file:line` in the review body where useful.
 
 ## Rules
 - Be concrete and kind. Every requested change must be actionable.

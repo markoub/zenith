@@ -33,7 +33,9 @@ npm run dev     # local dev server
 - `src/style.css` — styles.
 - `vault/` — the Obsidian knowledge base where requirements originate.
 - `.github/agents/` — role playbooks the pipeline agents follow.
-- `.github/workflows/` — the pipeline itself (analyst → developer → reviewer → CI → merge → deploy).
+- The pipeline: **Analyst, Developer, and Reviewer are Claude Routines** (cloud agents at
+  claude.ai/code/routines, run hourly + on-demand). **CI and Deploy are GitHub Actions**
+  (`.github/workflows/{ci,deploy}.yml`).
 
 ## How the pipeline labels flow
 
