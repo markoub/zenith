@@ -2,10 +2,10 @@
 type: requirement
 id: REQ-001
 title: Streaks and momentum
-status: ready          # 🎬 DEMO: flip this to `ready`, commit & push to wake the pipeline
+status: groomed
 priority: high
 created: 2026-06-02
-issues: []
+issues: [1, 2]
 ---
 
 # REQ-001 — Streaks and momentum
@@ -48,3 +48,8 @@ a small visual reward (a 🔥 badge) once I'm on a roll.
 ---
 > 🎬 **This is the live-demo requirement.** Set `status: ready` and push to trigger the
 > Analyst routine. See [[../09 - How it works/SDLC Pipeline]].
+
+## Grooming log
+
+- #1 — [REQ-001] Add currentStreak and bestStreak pure functions with unit tests
+- #2 — [REQ-001] Show current streak count and 🔥 badge per habit in the UI
