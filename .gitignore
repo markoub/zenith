@@ -1,0 +1,10 @@
+node_modules
+dist
+*.local
+.DS_Store
+.vite
+
+# Obsidian local workspace state (keep the vault content, drop machine state)
+vault/.obsidian/workspace.json
+vault/.obsidian/workspace-mobile.json
+vault/.obsidian/cache
