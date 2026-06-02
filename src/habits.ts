@@ -45,3 +45,28 @@ export function toggleCompletion(habit: Habit, day: string): Habit {
     : [...habit.completions, day].sort();
   return { ...habit, completions };
 }
+
+function shiftDay(day: string, delta: number): string {
+  const d = new Date(day + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + delta);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Count how many of the habit's completions fall within [fromDay, toDay] inclusive.
+ * Both bounds are ISO-8601 date strings (YYYY-MM-DD).
+ */
+export function completionsInRange(
+  habit: Habit,
+  fromDay: string,
+  toDay: string
+): number {
+  return habit.completions.filter((d) => d >= fromDay && d <= toDay).length;
+}
+
+/**
+ * Count completions in the 7-day window ending on (and including) `today`.
+ */
+export function last7Count(habit: Habit, today: string): number {
+  return completionsInRange(habit, shiftDay(today, -6), today);
+}
