@@ -33,10 +33,11 @@ npm run dev     # local dev server
 - `src/style.css` — styles.
 - `vault/` — the Obsidian knowledge base where requirements originate.
 - `.github/agents/` — role playbooks the pipeline agents follow.
-- The pipeline is **five event-triggered GitHub Actions workflows** (`.github/workflows/`):
-  `analyst` (push to vault requirements) → `developer` (issue labeled) → `ci` (PR) →
-  `reviewer` (PR labeled) → `deploy` (push to main). It cascades via a `PIPELINE_TOKEN` PAT.
-  (The same roles also exist as scheduled Claude Routines, currently disabled.)
+- The pipeline: **Analyst, Developer, Reviewer are Claude Routines** (claude.ai/code/routines).
+  Triggers (UI-configured): Analyst & Developer via **API `/fire`** (Analyst chains to Developer);
+  **Reviewer via a GitHub `pull_request` event** (routine GitHub triggers support pull_request +
+  release only). **CI and Deploy are GitHub Actions** (`.github/workflows/{ci,deploy}.yml`).
+  No schedules — everything is trigger-driven.
 
 ## How the pipeline labels flow
 

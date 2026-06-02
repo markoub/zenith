@@ -13,11 +13,12 @@ written here flows, with no human writing code, all the way to a deployed featur
 ```mermaid
 flowchart TD
     A["📝 Requirement note in Obsidian<br/>(status: ready)"] -->|git push| B
-    B["🧭 Analyst<br/><i>analyst.yml</i>"] -->|creates| C["🎫 GitHub Issues<br/>label: ready-for-dev"]
-    C -->|issue labeled| D["👩‍💻 Developer<br/><i>developer.yml</i>"]
+    B["🧭 Analyst<br/><i>Claude Routine · API</i>"] -->|creates| C["🎫 GitHub Issues<br/>label: ready-for-dev"]
+    B -->|fires via API| D
+    C -.-> D["👩‍💻 Developer<br/><i>Claude Routine · API</i>"]
     D -->|opens PR<br/>label: needs-review| E["🔀 Pull Request"]
     E --> F["✅ CI / Tester<br/><i>ci.yml</i> — npm test + build"]
-    E --> G["🧐 Reviewer<br/><i>reviewer.yml</i>"]
+    E -->|GitHub PR event| G["🧐 Reviewer<br/><i>Claude Routine</i>"]
     G -->|review + label: ready-to-merge| H["🤝 Squash-merge"]
     F -->|green check| H
     H -->|push to main| I["🚀 Deploy<br/><i>deploy.yml</i> → GitHub Pages"]
@@ -27,23 +28,22 @@ flowchart TD
 
 ## The cast
 
-Every stage is an **event-triggered GitHub Actions workflow** running Claude Code. Nothing
-runs on a clock — each step fires on the event the previous step produced.
+The three thinking roles are **Claude Routines** — cloud agents at
+[claude.ai/code/routines](https://claude.ai/code/routines). They fire on **triggers, never on
+a schedule**. The two mechanical roles are plain **GitHub Actions**.
 
-| Stage | Fires on | What the agent does |
-| ----- | -------- | ------------------- |
-| 🧭 **Analyst** `analyst.yml` | push to `vault/02 - Requirements/**` | Reads `ready` requirements, decomposes each into 2–4 well-formed issues with acceptance criteria, labels them `ready-for-dev`, links them back into the note, sets it `groomed`. |
-| 👩‍💻 **Developer** `developer.yml` | issue labeled `ready-for-dev` | Branches, implements the feature + tests, runs the build, opens a PR (`Closes #N`), labels it `needs-review`. |
-| ✅ **Tester / CI** `ci.yml` | every pull request | `npm ci && npm test && npm run build`. The green check. |
-| 🧐 **Reviewer** `reviewer.yml` | PR labeled `needs-review` | Reviews the diff against `CLAUDE.md` standards, posts a review, then (if it passes and CI is green) labels `ready-to-merge` and squash-merges. |
-| 🚀 **Deploy** `deploy.yml` | push to `main` | Builds and publishes to GitHub Pages. |
+| Stage | Runs as | Trigger | What the agent does |
+| ----- | ------- | ------- | ------------------- |
+| 🧭 **Analyst** | Claude Routine | **API** (`/fire`) / Run now | Reads `ready` requirements, decomposes each into well-formed issues, labels them `ready-for-dev`, links them into the note, sets it `groomed`, then fires the Developer. |
+| 👩‍💻 **Developer** | Claude Routine | **API** (`/fire`) — from the Analyst | Branches, implements the feature + tests, runs the build, opens a PR (`Closes #N`), labels it `needs-review`. |
+| ✅ **Tester / CI** | GitHub Action `ci.yml` | every pull request | `npm ci && npm test && npm run build`. The green check. |
+| 🧐 **Reviewer** | Claude Routine | **GitHub event** `pull_request.opened` | Reviews the diff against `CLAUDE.md`, posts a review, then (if it passes and CI is green) merges. |
+| 🚀 **Deploy** | GitHub Action `deploy.yml` | push to `main` | Builds and publishes to GitHub Pages. |
 
-> The chain cascades because each workflow runs with a `PIPELINE_TOKEN` (a PAT) instead of the
-> default `GITHUB_TOKEN` — GitHub deliberately blocks `GITHUB_TOKEN`-created events from
-> triggering further workflows, so the token is what lets issue→PR→review→merge→deploy flow.
->
-> The same agent roles can also run as scheduled **Claude Routines** — that variant is wired
-> but disabled in favour of these event-driven workflows.
+> **Why this shape?** Routine GitHub-event triggers support `pull_request` and `release` events
+> (configured in the Routines UI, needing the Claude GitHub App). So the **Reviewer** reacts to
+> PRs natively; the **Analyst → Developer** hops use the routines' **API** trigger (`/fire`).
+> Nothing runs on a timer.
 
 The detailed brief each agent follows lives in [`.github/agents/`](https://github.com/markoub/zenith)
 (`analyst.md`, `developer.md`, `reviewer.md`).

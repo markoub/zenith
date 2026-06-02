@@ -15,36 +15,40 @@ with **GitHub Actions** handling the deterministic plumbing (tests + deploy):
 
 ```mermaid
 flowchart LR
-    A["📝 Requirement<br/>in Obsidian"] -->|git push| B["🧭 Analyst"]
-    B -->|GitHub issues| C["👩‍💻 Developer"]
-    C -->|pull request| D["✅ CI / Tester"]
-    C --> E["🧐 Reviewer"]
+    A["📝 Requirement<br/>in Obsidian"] -->|API / Run now| B["🧭 Analyst<br/><i>routine</i>"]
+    B -->|fires (API) + GitHub issues| C["👩‍💻 Developer<br/><i>routine</i>"]
+    C -->|opens pull request| D["✅ CI / Tester<br/><i>action</i>"]
+    C -->|GitHub PR event| E["🧐 Reviewer<br/><i>routine</i>"]
     D --> F["🤝 Merge"]
     E --> F
-    F -->|push to main| G["🚀 Deploy"]
+    F -->|push to main| G["🚀 Deploy<br/><i>action</i>"]
     G --> H["🌍 Live app"]
 ```
 
-Every stage is an **event-triggered GitHub Actions workflow** running Claude Code — nothing
-is on a schedule; each step fires off the previous step's event:
+The three AI roles are **Claude Routines** — cloud agents in the
+[Routines panel](https://claude.ai/code/routines). They run on **triggers, never on a clock**:
 
-| Stage | Fires on | What happens |
-| ----- | -------- | ------------ |
-| 🧭 **Analyst** ([`analyst.yml`](.github/workflows/analyst.yml)) | push to `vault/02 - Requirements/**` | Grooms a `ready` requirement into well-formed GitHub issues. |
-| 👩‍💻 **Developer** ([`developer.yml`](.github/workflows/developer.yml)) | issue labeled `ready-for-dev` | Implements the issue on a branch, with tests, and opens a PR. |
-| ✅ **Tester / CI** ([`ci.yml`](.github/workflows/ci.yml)) | every pull request | `npm test` + `npm run build`. |
-| 🧐 **Reviewer** ([`reviewer.yml`](.github/workflows/reviewer.yml)) | PR labeled `needs-review` | Reviews the diff, then merges once CI is green. |
-| 🚀 **Deploy** ([`deploy.yml`](.github/workflows/deploy.yml)) | push to `main` | Publishes to GitHub Pages. |
+| Stage | Runs as | Trigger |
+| ----- | ------- | ------- |
+| 🧭 **Analyst** | Claude Routine | **API** (`/fire`) or *Run now* — kicked when a requirement is ready |
+| 👩‍💻 **Developer** | Claude Routine | **API** (`/fire`) — chained from the Analyst |
+| ✅ **Tester / CI** | GitHub Action ([`ci.yml`](.github/workflows/ci.yml)) | every pull request |
+| 🧐 **Reviewer** | Claude Routine | **GitHub event** — `pull_request.opened` |
+| 🚀 **Deploy** | GitHub Action ([`deploy.yml`](.github/workflows/deploy.yml)) | push to `main` |
 
-> The same agent roles can also run as scheduled **Claude Routines** (see the Routines panel) —
-> that variant is wired but disabled in favour of the event-driven workflows above.
+> Routine triggers (GitHub event + API) are configured in the
+> [Routines UI](https://claude.ai/code/routines) and need the **Claude GitHub App** installed.
+> GitHub-event triggers support `pull_request` and `release` events — so the **Reviewer**
+> reacts to PRs directly, while the Analyst→Developer hops fire over the routine API.
 
-Each agent follows a versioned role brief in [`.github/agents/`](.github/agents). The full
+Each routine follows a versioned role brief in [`.github/agents/`](.github/agents). The full
 story is in the vault: [`vault/09 - How it works/SDLC Pipeline.md`](vault/09%20-%20How%20it%20works/SDLC%20Pipeline.md).
 
 ### Start the machine
-Open a requirement (e.g. [`REQ-001`](vault/02%20-%20Requirements/REQ-001%20-%20Streaks%20and%20momentum.md)),
-set `status: ready`, and push. Then watch the **Actions** and **Pull requests** tabs.
+Mark a requirement `status: ready`, push, then fire the **Analyst** routine (Run now, or its
+`/fire` API endpoint). It grooms the requirement into issues and kicks the Developer; the
+Developer's PR then triggers the Reviewer automatically. Watch it in the
+[Routines panel](https://claude.ai/code/routines) and the repo's **Pull requests** tab.
 
 ---
 

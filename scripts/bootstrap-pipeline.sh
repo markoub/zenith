@@ -19,8 +19,8 @@ gh api -X PATCH "repos/$REPO" -f allow_auto_merge=true -f delete_branch_on_merge
 gh api -X POST "repos/$REPO/pages" -f "source[branch]=main" -f build_type=workflow >/dev/null 2>&1 \
   || gh api -X PUT "repos/$REPO/pages" -f build_type=workflow >/dev/null 2>&1 || true
 
-echo "✅ Done. The pipeline is event-driven GitHub Actions. Set two repo secrets (one-time):"
-echo "   1) gh secret set CLAUDE_CODE_OAUTH_TOKEN --repo $REPO   (value from: claude setup-token)"
-echo "   2) gh secret set PIPELINE_TOKEN          --repo $REPO   (classic PAT: repo + workflow scopes)"
-echo "      → https://github.com/settings/tokens/new?scopes=repo,workflow&description=zenith-pipeline"
-echo "   CI + Deploy use the built-in GITHUB_TOKEN; the agent stages need the two secrets above."
+echo "✅ Done. Agent stages run as Claude Routines (claude.ai/code/routines) — NO repo secrets."
+echo "   In the Routines UI, give each routine a trigger (no schedule):"
+echo "     • Reviewer  → GitHub event: pull_request.opened   (install the Claude GitHub App when prompted)"
+echo "     • Analyst   → API trigger (/fire)   • Developer → API trigger (/fire)"
+echo "   CI + Deploy are GitHub Actions and use the built-in GITHUB_TOKEN (no setup)."
