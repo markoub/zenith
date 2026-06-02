@@ -8,3 +8,7 @@ dist
 vault/.obsidian/workspace.json
 vault/.obsidian/workspace-mobile.json
 vault/.obsidian/cache
+
+# Playwright/demo artifacts
+.playwright-mcp
+zenith-live.png
