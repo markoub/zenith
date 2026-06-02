@@ -15,28 +15,31 @@ with **GitHub Actions** handling the deterministic plumbing (tests + deploy):
 
 ```mermaid
 flowchart LR
-    A["📝 Requirement<br/>in Obsidian"] -->|git push| B["🧭 Analyst<br/><i>routine</i>"]
-    B -->|GitHub issues| C["👩‍💻 Developer<br/><i>routine</i>"]
-    C -->|pull request| D["✅ CI / Tester<br/><i>action</i>"]
-    C --> E["🧐 Reviewer<br/><i>routine</i>"]
+    A["📝 Requirement<br/>in Obsidian"] -->|git push| B["🧭 Analyst"]
+    B -->|GitHub issues| C["👩‍💻 Developer"]
+    C -->|pull request| D["✅ CI / Tester"]
+    C --> E["🧐 Reviewer"]
     D --> F["🤝 Merge"]
     E --> F
-    F -->|push to main| G["🚀 Deploy<br/><i>action</i>"]
+    F -->|push to main| G["🚀 Deploy"]
     G --> H["🌍 Live app"]
 ```
 
-The three AI roles are **Claude Routines** — autonomous cloud agents you can watch in the
-[Routines panel](https://claude.ai/code/routines). They run hourly and on-demand:
+Every stage is an **event-triggered GitHub Actions workflow** running Claude Code — nothing
+is on a schedule; each step fires off the previous step's event:
 
-| Stage | Runs as | What happens |
-| ----- | ------- | ------------ |
-| 🧭 **Analyst** | Claude Routine | Grooms a `ready` requirement into well-formed GitHub issues. |
-| 👩‍💻 **Developer** | Claude Routine | Implements an issue on a branch, with tests, and opens a PR. |
-| ✅ **Tester / CI** | GitHub Action ([`ci.yml`](.github/workflows/ci.yml)) | `npm test` + `npm run build` on every PR. |
-| 🧐 **Reviewer** | Claude Routine | Reviews the diff, requests changes or merges once CI is green. |
-| 🚀 **Deploy** | GitHub Action ([`deploy.yml`](.github/workflows/deploy.yml)) | Publishes to GitHub Pages. |
+| Stage | Fires on | What happens |
+| ----- | -------- | ------------ |
+| 🧭 **Analyst** ([`analyst.yml`](.github/workflows/analyst.yml)) | push to `vault/02 - Requirements/**` | Grooms a `ready` requirement into well-formed GitHub issues. |
+| 👩‍💻 **Developer** ([`developer.yml`](.github/workflows/developer.yml)) | issue labeled `ready-for-dev` | Implements the issue on a branch, with tests, and opens a PR. |
+| ✅ **Tester / CI** ([`ci.yml`](.github/workflows/ci.yml)) | every pull request | `npm test` + `npm run build`. |
+| 🧐 **Reviewer** ([`reviewer.yml`](.github/workflows/reviewer.yml)) | PR labeled `needs-review` | Reviews the diff, then merges once CI is green. |
+| 🚀 **Deploy** ([`deploy.yml`](.github/workflows/deploy.yml)) | push to `main` | Publishes to GitHub Pages. |
 
-Each routine follows a versioned role brief in [`.github/agents/`](.github/agents). The full
+> The same agent roles can also run as scheduled **Claude Routines** (see the Routines panel) —
+> that variant is wired but disabled in favour of the event-driven workflows above.
+
+Each agent follows a versioned role brief in [`.github/agents/`](.github/agents). The full
 story is in the vault: [`vault/09 - How it works/SDLC Pipeline.md`](vault/09%20-%20How%20it%20works/SDLC%20Pipeline.md).
 
 ### Start the machine
