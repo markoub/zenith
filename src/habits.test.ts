@@ -4,6 +4,7 @@ import {
   toggleCompletion,
   isCompletedOn,
   dayStr,
+  shiftDay,
   currentStreak,
   bestStreak,
   completionsInRange,
@@ -44,6 +45,25 @@ describe("toggleCompletion", () => {
 describe("dayStr", () => {
   it("formats a date as YYYY-MM-DD", () => {
     expect(dayStr(new Date(2026, 5, 2))).toBe("2026-06-02");
+  });
+});
+
+describe("shiftDay", () => {
+  it("shifts forward by positive delta", () => {
+    expect(shiftDay("2026-06-01", 1)).toBe("2026-06-02");
+  });
+
+  it("shifts backward by negative delta", () => {
+    expect(shiftDay("2026-06-01", -1)).toBe("2026-05-31");
+  });
+
+  it("returns the same day for delta 0", () => {
+    expect(shiftDay("2026-06-15", 0)).toBe("2026-06-15");
+  });
+
+  it("handles month boundaries correctly", () => {
+    expect(shiftDay("2026-05-31", 1)).toBe("2026-06-01");
+    expect(shiftDay("2026-06-01", -29)).toBe("2026-05-03");
   });
 });
 
