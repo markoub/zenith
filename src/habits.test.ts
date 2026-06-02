@@ -6,6 +6,8 @@ import {
   dayStr,
   currentStreak,
   bestStreak,
+  completionsInRange,
+  last7Count,
 } from "./habits";
 
 describe("createHabit", () => {
@@ -85,6 +87,77 @@ describe("currentStreak", () => {
     h = toggleCompletion(h, "2026-06-09");
     h = toggleCompletion(h, "2026-06-10");
     expect(currentStreak(h, today)).toBe(2);
+  });
+});
+
+describe("completionsInRange", () => {
+  it("returns 0 when there are no completions", () => {
+    const h = createHabit("Test");
+    expect(completionsInRange(h, "2026-06-01", "2026-06-07")).toBe(0);
+  });
+
+  it("counts completions strictly inside the range", () => {
+    let h = createHabit("Test");
+    h = toggleCompletion(h, "2026-06-03");
+    h = toggleCompletion(h, "2026-06-05");
+    expect(completionsInRange(h, "2026-06-01", "2026-06-07")).toBe(2);
+  });
+
+  it("includes completions on the fromDay boundary", () => {
+    let h = createHabit("Test");
+    h = toggleCompletion(h, "2026-06-01");
+    expect(completionsInRange(h, "2026-06-01", "2026-06-07")).toBe(1);
+  });
+
+  it("includes completions on the toDay boundary", () => {
+    let h = createHabit("Test");
+    h = toggleCompletion(h, "2026-06-07");
+    expect(completionsInRange(h, "2026-06-01", "2026-06-07")).toBe(1);
+  });
+
+  it("excludes completions outside the range", () => {
+    let h = createHabit("Test");
+    h = toggleCompletion(h, "2026-05-31"); // before
+    h = toggleCompletion(h, "2026-06-08"); // after
+    expect(completionsInRange(h, "2026-06-01", "2026-06-07")).toBe(0);
+  });
+});
+
+describe("last7Count", () => {
+  const today = "2026-06-10";
+
+  it("returns 0 when there are no completions", () => {
+    const h = createHabit("Test");
+    expect(last7Count(h, today)).toBe(0);
+  });
+
+  it("counts all 7 completions in a full window", () => {
+    let h = createHabit("Test");
+    for (let d = 4; d <= 10; d++) {
+      h = toggleCompletion(h, `2026-06-${String(d).padStart(2, "0")}`);
+    }
+    expect(last7Count(h, today)).toBe(7);
+  });
+
+  it("counts partial completions within the 7-day window", () => {
+    let h = createHabit("Test");
+    h = toggleCompletion(h, "2026-06-05"); // inside (day -5)
+    h = toggleCompletion(h, "2026-06-10"); // inside (today)
+    h = toggleCompletion(h, "2026-06-03"); // outside (day -7)
+    expect(last7Count(h, today)).toBe(2);
+  });
+
+  it("includes today and the oldest day of the 7-day window (day -6)", () => {
+    let h = createHabit("Test");
+    h = toggleCompletion(h, "2026-06-04"); // exactly 6 days ago — boundary
+    h = toggleCompletion(h, "2026-06-10"); // today
+    expect(last7Count(h, today)).toBe(2);
+  });
+
+  it("excludes completions older than 7 days", () => {
+    let h = createHabit("Test");
+    h = toggleCompletion(h, "2026-06-03"); // 7 days ago, outside window
+    expect(last7Count(h, today)).toBe(0);
   });
 });
 

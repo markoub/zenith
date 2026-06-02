@@ -73,6 +73,26 @@ export function currentStreak(habit: Habit, today: string): number {
 }
 
 /**
+ * Count completions whose date falls within [fromDay, toDay] inclusive.
+ * Both arguments are YYYY-MM-DD strings; ISO lexicographic order is used.
+ */
+export function completionsInRange(
+  habit: Habit,
+  fromDay: string,
+  toDay: string
+): number {
+  return habit.completions.filter((d) => d >= fromDay && d <= toDay).length;
+}
+
+/**
+ * Count completions in the 7-day window ending on (and including) `today`.
+ */
+export function last7Count(habit: Habit, today: string): number {
+  const sevenDaysAgo = shiftDay(today, -6);
+  return completionsInRange(habit, sevenDaysAgo, today);
+}
+
+/**
  * Length of the longest run of consecutive completed days ever recorded.
  * Returns 0 for a habit with no completions.
  */
