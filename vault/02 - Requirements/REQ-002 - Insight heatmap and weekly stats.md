@@ -2,7 +2,7 @@
 type: requirement
 id: REQ-002
 title: Insight — heatmap and weekly stats
-status: draft
+status: ready
 priority: medium
 created: 2026-06-02
 issues: []
